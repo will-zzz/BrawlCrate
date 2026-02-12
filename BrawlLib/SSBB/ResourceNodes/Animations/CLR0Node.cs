@@ -101,7 +101,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             CLR0MaterialNode node = new CLR0MaterialNode();
             CLR0MaterialEntryNode entry = new CLR0MaterialEntryNode
             {
-                _target = EntryTarget.ColorRegister0
+                _target = EntryTarget.LightChannel0MaterialColor
             };
             entry._name = entry._target.ToString();
             entry._numEntries = -1;
@@ -435,6 +435,7 @@ namespace BrawlLib.SSBB.ResourceNodes
                     }
 
                     UpdateCurrentControl();
+                    SignalPropertyChange();
                 }
             }
         }
