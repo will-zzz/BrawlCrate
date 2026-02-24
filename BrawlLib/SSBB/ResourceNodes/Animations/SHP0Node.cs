@@ -742,20 +742,21 @@ namespace BrawlLib.SSBB.ResourceNodes
         public override int OnCalculateSize(bool force)
         {
             _isFixed = Keyframes._keyCount <= 1;
-            return _dataLen = _isFixed ? 0 : Keyframes._keyCount * 12 + 4;
+            return _dataLen = _isFixed ? 0 : Keyframes._keyCount * 12 + 8;
         }
 
         public override void OnRebuild(VoidPtr address, int length, bool force)
         {
             SHP0KeyframeEntries* header = (SHP0KeyframeEntries*) address;
             header->_numEntries = (short) Keyframes._keyCount;
-            header->_unk1 = 0;
+            header->_pad = 0;
+            header->_recip = 1 / (float)(Keyframes._frameLimit - 1);
 
             BVec3* entry = header->Entries;
             KeyframeEntry frame, root = Keyframes._keyRoot;
             for (frame = root._next; frame._index != -1; frame = frame._next)
             {
-                *entry++ = new Vector3(frame._tangent, frame._index, frame._value);
+                *entry++ = new Vector3(frame._index, frame._value, frame._tangent);
             }
         }
 

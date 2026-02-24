@@ -188,7 +188,8 @@ namespace BrawlLib.SSBB.Types.Animations
     internal unsafe struct SHP0KeyframeEntries
     {
         public bshort _numEntries;
-        public bshort _unk1;
+        public bshort _pad;
+        public bfloat _recip;
 
         private VoidPtr Address
         {
@@ -201,6 +202,6 @@ namespace BrawlLib.SSBB.Types.Animations
             }
         }
 
-        public BVec3* Entries => (BVec3*) (Address + 4);
+        public BVec3* Entries => (BVec3*) (Address + 8);
     }
 }
