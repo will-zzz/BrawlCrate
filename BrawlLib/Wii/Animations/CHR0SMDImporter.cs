@@ -47,6 +47,8 @@ namespace BrawlLib.Wii.Animations
 
         public static CHR0Node Convert(string input)
         {
+            bool isReadingBones = false;
+            bool isReadingFrames = false;
             try
             {
                 CHR0Node chr0 = new CHR0Node
@@ -58,10 +60,8 @@ namespace BrawlLib.Wii.Animations
                 List<string> boneNames = new List<string>();
                 List<int> boneIDs = new List<int>();
                 int lineNumber = 0;
-                bool isReadingBones = false;
-                bool isReadingFrames = false;
                 int currentFrameID = new int();
-                float radianFloat = 57.29579143313326f; //Angles are given in radians. To convert them into degrees, multiply them by this float.
+                const float radianFloat = 57.29579143313326f; //Angles are given in radians. To convert them into degrees, multiply them by this float.
                 List<SMDFrame> allFrames = new List<SMDFrame>();
                 TextReader reader = new StreamReader(input);
                 while (reader.Peek() != -1) //Writing data into Lists
@@ -107,13 +107,10 @@ namespace BrawlLib.Wii.Animations
                         allFrames.Add(currentFrame);
                     }
 
-                    if (lineNumber == 0) //First Line
+                    if (lineNumber == 0 && !line.Equals("version 1", StringComparison.OrdinalIgnoreCase)) //The first line contains the version number. It needs to be 1.
                     {
-                        if (!line.Equals("version 1", StringComparison.OrdinalIgnoreCase)) //The first line contains the version number. It needs to be 1.
-                        {
-                            MessageBox.Show("Unsupported SMD Version. Please use SMD Version 1."); //I don't even know if there's versions >1 but let's not take risks
-                            return null;
-                        }
+                        MessageBox.Show("Unsupported SMD Version. Please use SMD Version 1."); //I don't even know if there's versions >1 but let's not take risks
+                        return null;
                     }
 
                     if (line.Equals("nodes", StringComparison.OrdinalIgnoreCase)) //When reaching this line, we start reading bones names
@@ -171,7 +168,20 @@ namespace BrawlLib.Wii.Animations
             }
             catch (Exception e)
             {
-                MessageBox.Show("There was a problem importing keyframes.\n\nError:\n" + e);
+                string errorMessage;
+                if (isReadingBones)
+                {
+                    errorMessage = "There was a problem importing bones.\n\nError:\n";
+                }
+                else if (isReadingFrames)
+                {
+                    errorMessage = "There was a problem importing keyframes.\n\nError:\n";
+                }
+                else
+                {
+                    errorMessage = "There was a problem importing the animation.\n\nError:\n";
+                }
+                MessageBox.Show(errorMessage + e);
                 return null;
             }
         } 
