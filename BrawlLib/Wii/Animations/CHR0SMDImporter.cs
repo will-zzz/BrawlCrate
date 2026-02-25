@@ -52,7 +52,7 @@ namespace BrawlLib.Wii.Animations
                 CHR0Node chr0 = new CHR0Node
                 {
                     Name = Path.GetFileNameWithoutExtension(input),
-                    Loop = false,
+                    Loop = true,
                     Version = 4
                 };
                 List<string> boneNames = new List<string>();
@@ -63,11 +63,12 @@ namespace BrawlLib.Wii.Animations
                 int currentFrameID = new int();
                 float radianFloat = 57.29579143313326f; //Angles are given in radians. To convert them into degrees, multiply them by this float.
                 List<SMDFrame> allFrames = new List<SMDFrame>();
-                for (TextReader reader = new StreamReader(input); reader.Peek() != -1;) //Writing data into Lists
+                TextReader reader = new StreamReader(input);
+                while (reader.Peek() != -1) //Writing data into Lists
                 {
                     string line = reader.ReadLine();
 
-                    if (line.CompareTo("end") == 0) //When reaching this line, we stop reading what we were reading
+                    if (line.Equals("end", StringComparison.OrdinalIgnoreCase)) //When reaching this line, we stop reading what we were reading
                     {
                         isReadingBones = false;
                         isReadingFrames = false;
@@ -91,15 +92,15 @@ namespace BrawlLib.Wii.Animations
                             line = reader.ReadLine();
                             lineNumber++;
                         }
-                        string[] frameNumbers = line.Split(' ');
+                        string[] frameNumbers = line.Split();
                         
                         int boneID = int.Parse(frameNumbers[0], CultureInfo.InvariantCulture.NumberFormat);
-                        float posX = float.Parse(frameNumbers[2], CultureInfo.InvariantCulture.NumberFormat);
-                        float posY = float.Parse(frameNumbers[3], CultureInfo.InvariantCulture.NumberFormat);
-                        float posZ = float.Parse(frameNumbers[4], CultureInfo.InvariantCulture.NumberFormat);
-                        float rotX = float.Parse(frameNumbers[6], CultureInfo.InvariantCulture.NumberFormat) * radianFloat;
-                        float rotY = float.Parse(frameNumbers[7], CultureInfo.InvariantCulture.NumberFormat) * radianFloat;
-                        float rotZ = float.Parse(frameNumbers[8], CultureInfo.InvariantCulture.NumberFormat) * radianFloat;
+                        float posX = float.Parse(frameNumbers[1], CultureInfo.InvariantCulture.NumberFormat);
+                        float posY = float.Parse(frameNumbers[2], CultureInfo.InvariantCulture.NumberFormat);
+                        float posZ = float.Parse(frameNumbers[3], CultureInfo.InvariantCulture.NumberFormat);
+                        float rotX = float.Parse(frameNumbers[4], CultureInfo.InvariantCulture.NumberFormat) * radianFloat;
+                        float rotY = float.Parse(frameNumbers[5], CultureInfo.InvariantCulture.NumberFormat) * radianFloat;
+                        float rotZ = float.Parse(frameNumbers[6], CultureInfo.InvariantCulture.NumberFormat) * radianFloat;
 
                         currentFrame = new SMDFrame(currentFrameID, boneID, posX, posY, posZ, rotX, rotY, rotZ);
 
@@ -108,25 +109,27 @@ namespace BrawlLib.Wii.Animations
 
                     if (lineNumber == 0) //First Line
                     {
-                        if (line.CompareTo("version 1") != 0) //The first line contains the version number. It needs to be 1.
+                        if (!line.Equals("version 1", StringComparison.OrdinalIgnoreCase)) //The first line contains the version number. It needs to be 1.
                         {
                             MessageBox.Show("Unsupported SMD Version. Please use SMD Version 1."); //I don't even know if there's versions >1 but let's not take risks
                             return null;
                         }
                     }
 
-                    if (line.CompareTo("nodes") == 0) //When reaching this line, we start reading bones names
+                    if (line.Equals("nodes", StringComparison.OrdinalIgnoreCase)) //When reaching this line, we start reading bones names
                     {
                         isReadingBones = true;
                     }
 
-                    if (line.CompareTo("skeleton") == 0) //When reaching this line, we start reading frames
+                    if (line.Equals("skeleton", StringComparison.OrdinalIgnoreCase)) //When reaching this line, we start reading frames
                     {
                         isReadingFrames = true;
                     }
 
                     lineNumber++;
                 }
+
+                int frameCount = 0;
 
                 foreach (int thisBone in boneIDs)
                 {
@@ -159,9 +162,10 @@ namespace BrawlLib.Wii.Animations
                         }
                     }
 
-                    chr0.FrameCount = keynum;
-                    chr0.Loop = true;
+                    frameCount = keynum > frameCount ? keynum : frameCount;
                 }
+
+                chr0.FrameCount = frameCount;
 
                 return chr0;
             }
