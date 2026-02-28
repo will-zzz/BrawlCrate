@@ -1,0 +1,22 @@
+---
+description: BrawlCrate build environment - specifies which commands run on macOS vs Windows VM (Parallels)
+alwaysApply: true
+---
+
+# Build Environment: macOS Host + Windows VM (Parallels)
+
+The developer works on macOS with files synced to a Windows VM via Parallels.
+
+## When giving instructions or commands, always specify the environment:
+
+- **macOS (Cursor/host)**: Git operations, file editing, code review, searching, non-build terminal commands
+- **Windows VM (Parallels)**: Building the solution, running BrawlCrate.exe, Visual Studio operations, msbuild/dotnet build, cargo build, NuGet restore, running/debugging the app
+
+## Examples
+
+- "Run this in **Windows VM**: `msbuild BrawlCrateTools.sln /p:Configuration=Debug /p:Platform=x86`"
+- "Run this on **macOS**: `git checkout -b feature/golf-maps`"
+
+## Key constraint
+
+BrawlCrate targets .NET Framework 4.7.2 + WinForms, so it can only build and run on Windows. Never suggest building or running the app on macOS.
