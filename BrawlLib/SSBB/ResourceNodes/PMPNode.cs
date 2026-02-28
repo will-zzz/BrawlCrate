@@ -18,15 +18,22 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         public override bool OnInitialize()
         {
-            return Header->IsValid && WorkingUncompressed.Length >= PMPHeader.Size +
-                (int)(ushort)Header->_objectCount * PMPObjectEntry.Size;
+            if (!Header->IsValid)
+                return false;
+            int count = (ushort)Header->_objectCount;
+            int dataOffset = Header->_objectDataOffset;
+            if (dataOffset <= 0)
+                dataOffset = PMPHeader.Size;
+            return WorkingUncompressed.Length >= dataOffset + count * PMPObjectEntry.Size;
         }
 
         public override void OnPopulate()
         {
             byte* baseAddr = (byte*)WorkingUncompressed.Address;
             int dataOffset = Header->_objectDataOffset;
-            ushort count = Header->_objectCount;
+            if (dataOffset <= 0)
+                dataOffset = PMPHeader.Size;
+            ushort count = (ushort)Header->_objectCount;
             for (int i = 0; i < count; i++)
             {
                 VoidPtr entryAddr = baseAddr + dataOffset + i * PMPObjectEntry.Size;
@@ -43,7 +50,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         public override int OnCalculateSize(bool force)
         {
-            int dataOffset = 0x40;
+            int dataOffset = 0x44;
             return dataOffset + Children.Count * PMPObjectEntry.Size;
         }
 
@@ -52,9 +59,9 @@ namespace BrawlLib.SSBB.ResourceNodes
             PMPHeader* header = (PMPHeader*)address;
             header->_tag = PMPHeader.Tag;
             header->_objectCount = (ushort)Children.Count;
-            header->_objectDataOffset = 0x40;
+            header->_objectDataOffset = 0x44;
 
-            VoidPtr entryAddr = address + 0x40;
+            VoidPtr entryAddr = address + 0x44;
             foreach (ResourceNode child in Children)
             {
                 if (child is PMPObjectEntryNode entryNode)
@@ -67,12 +74,18 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         internal static ResourceNode TryParse(DataSource source, ResourceNode parent)
         {
-            if (source.Length < PMPHeader.Size)
+            if (source.Length < 0x44)
                 return null;
             PMPHeader* h = (PMPHeader*)source.Address;
-            if (!h->IsValid)
+            if (h->_tag != PMPHeader.Tag)
                 return null;
-            if (source.Length < h->_objectDataOffset + (int)(ushort)h->_objectCount * PMPObjectEntry.Size)
+            int count = (ushort)h->_objectCount;
+            if (count <= 0)
+                return null;
+            int dataOffset = h->_objectDataOffset;
+            if (dataOffset <= 0)
+                dataOffset = PMPHeader.Size;
+            if (source.Length < dataOffset + count * PMPObjectEntry.Size)
                 return null;
             return new PMPNode();
         }

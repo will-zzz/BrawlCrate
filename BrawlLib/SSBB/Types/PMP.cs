@@ -10,14 +10,14 @@ namespace BrawlLib.SSBB.Types
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct PMPHeader
     {
-        public const int Size = 0x40;
+        public const int Size = 0x44;
         public const uint Tag = 0x504D5046; // 'PMPF' big-endian
 
         public buint _tag;
         private fixed byte _pad1[0x0C];
         public bushort _objectCount;
-        private fixed byte _pad2[0x2A]; // to 0x3C
-        public bint _objectDataOffset;  // at 0x3C
+        private fixed byte _pad2[0x2E]; // 0x12 to 0x40
+        public bint _objectDataOffset;   // at 0x40
 
         internal VoidPtr Address
         {
@@ -30,7 +30,7 @@ namespace BrawlLib.SSBB.Types
             }
         }
 
-        public bool IsValid => _tag == Tag && (ushort)_objectCount > 0 && _objectDataOffset >= Size;
+        public bool IsValid => _tag == Tag && (ushort)_objectCount > 0;
     }
 
     /// <summary>
