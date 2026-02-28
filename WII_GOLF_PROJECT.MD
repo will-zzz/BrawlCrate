@@ -57,10 +57,67 @@ Visual representation of the course.
 
 To test maps without restarting Dolphin:
 
-- **Environment:** Use Dolphin's "loose file" loading (*Right-click game → Properties → File System → Extract entire Disc*).
-- **Path:** Edit the loose `.szs` file in `Stage/Golf/Golf_X.szs`.
-- **Cycle:**
-  1. Modify file in BrawlCrate and save.
-  2. In Dolphin, exit the current hole to the course selection menu.
-  3. Re-enter the hole. The engine unloads/reloads the SZS archive, reflecting changes immediately.
+- **Environment:** Use Dolphin's **loose file** loading so the game reads from an extracted folder instead of the disc image. That way when you save from BrawlCrate, Dolphin will use your edited files the next time it loads that content.
+- **Path:** Course files live under the game’s filesystem, e.g. `files/Stage/RPGolScene/` (e.g. `gif_course_fc1.carc`, `glf_course_fc1.carc`). The exact path may vary by game/region.
+
+### Step-by-step: Run edited courses in Dolphin
+
+1. **Extract the game (one-time)**  
+   - In Dolphin: right‑click **Wii Sports** → **Properties** → **File System** (or **Open Wii Save Folder** / **Browse** depending on Dolphin version).  
+   - Use **Extract entire disc** (or **Extract entire NAND** if you’re using NAND) and choose a folder (e.g. `C:\Dolphin\Extracted\WiiSports`).  
+   - Wait until extraction finishes. You should see a `files` (or similar) folder with `Stage`, `RPGolScene`, etc.
+
+2. **Find the course file**  
+   - In the extracted folder, go to e.g. `files/Stage/RPGolScene/`.  
+   - You’ll see `.carc` files (e.g. `gif_course_fc1.carc`, `glf_course_fc1.carc`).  
+   - Remember this path; you’ll save back here from BrawlCrate.
+
+3. **Edit in BrawlCrate**  
+   - In BrawlCrate: **File → Open** and open the `.carc` from the extracted path (e.g. `…/RPGolScene/glf_course_fc1.carc`).  
+   - Make your changes (e.g. move a Cup’s Position in the PMP).  
+   - **File → Save** (or **Save As**) and save **to the same path**, overwriting the original `.carc`.  
+   - Close the file or leave it open; the important part is that the file on disk is updated.
+
+4. **Run in Dolphin**  
+   - Start Dolphin and run **Wii Sports** the way you normally do **from the extracted content** (or from a disc image that’s configured to use the same path—depends how you set up “load from extracted”).  
+   - Go to Golf → pick the course and hole you edited.  
+   - Play the hole. Your edits are in the file Dolphin is loading.
+
+5. **See changes without restarting**  
+   - After playing (or at any time), **exit the hole** back to the course selection (or main menu).  
+   - **Re-enter the same hole** (or same course).  
+   - Dolphin reloads the archive from disk, so you’ll see your latest save (e.g. new cup position). You don’t need to restart Dolphin or the game.
+
+**If Dolphin doesn’t use the extracted folder:**  
+- Make sure the game is actually set to load from that folder (e.g. “Load from Extracted” or a custom path in game properties).  
+- Confirm you saved the `.carc` in the correct place (same path you opened from).  
+- If you only have a disc image (ISO): extract once as above, then in BrawlCrate always open and save to the extracted path; use Dolphin’s option to prefer/load from that extracted directory if available.
+
+## 5. Naming: Extracted vs Convention
+
+- **From the data:** **Object Group ID** and **Object ID** are read from the PMP at 0x00 and 0x02 in each object entry. The tree shows these as e.g. `(Group 1, ID 0)`.
+- **By convention:** The labels **"Cup"** and **"Tee"** are currently derived from Object ID: `ID 0` → "Cup", `ID 1` → "Tee". Any other ID is shown as "Object". This matches common Wii Sports Golf PMP usage; if another game or mod uses different IDs, the display name would still show the actual ID in parentheses.
+
+## 6. Changing the Hole Location (Current Workflow)
+
+1. Open the course `.carc` (e.g. `gif_course_fc1.carc`).
+2. Expand the `.pmp` node.
+3. Select the **Cup** entry (e.g. `Cup [115] (Group 1, ID 0)`).
+4. In the **property grid** (right panel), open the **"PMP Object"** section.
+5. Edit **Position** — format is `X, Y, Z`. These are world-space coordinates; change them to move the hole.
+6. Save the archive so the game loads the updated PMP.
+
+## 7. Multiple Pin and Tee Objects / How Placement Is Decided
+
+- **Multiple cups (ID 0)** = **multiple pin positions** for the same hole. On Wii Golf courses the **tee is typically the same** for a hole, but there are **several possible hole (pin) locations** on or around the green. The game likely picks one cup per round (e.g. at random or by day) for variety. So: many Cup objects = many possible pin placements; the game chooses one when you play.
+- **Multiple tees (ID 1)** = multiple tee positions in the data. These could be for different holes sharing the same PMP, different game modes, or other logic. Observed: hole 1 can have fewer objects (e.g. 1 cup, 3 tees); hole 2 can have 20+ cup objects and ~10 tee objects, all with different positions. So the PMP can define many pin options and several tee options per hole (or across holes).
+- **How the game picks which cup/tee** is not fully documented. Route/Point data in the PMP (offsets at 0x40+) likely reference which object index is the active pin (and tee) for a given hole or round. To confirm: compare object counts and order across holes, or test in-game (e.g. replay the same hole and see if the pin position changes).
+- For **moving the hole**, edit the **Position** of the **Cup** object(s) you want to change. If the game uses a specific cup by index, you may need to move that one; if it picks randomly, any cup you move will affect one of the possible pin positions.
+
+## 8. Next Steps: Visual Editor for Placing the Hole
+
+- **Reference for the 3D view:** Use the **BRRES** model(s) in the same archive (e.g. `gif_course_fc1.brres` / `gif_map_fc1.brres`) as the visual reference. They contain the course geometry and are what BrawlCrate can render.
+- **Reference for the hole position:** Use the **PMP** — specifically the **Cup** (and optionally Tee) **Position** vectors already parsed in `PMPNode` / `PMPObjectEntryNode`.
+- **Implementation outline:** (1) Reuse or add a 3D viewport that loads and renders the course BRRES. (2) Draw PMP objects (Cup, Tee) as gizmos at their `Position` in the same 3D space. (3) Allow dragging a gizmo to change the selected object's `Position` and write back to the PMP. (4) Optionally sync cup position to the green mesh in the BRRES (Dual-Edit Sync).
+- **Which file is the reference:** The **BRRES** is the reference for *drawing* the course; the **PMP** is the reference for *editing* hole/tee placement. Both live in the same `.carc`.
 
