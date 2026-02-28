@@ -1,4 +1,4 @@
-﻿using BrawlLib.SSBB.ResourceNodes;
+using BrawlLib.SSBB.ResourceNodes;
 using System;
 using System.Collections.Generic;
 
@@ -214,6 +214,9 @@ namespace BrawlLib.SSBB
         public static string ITOV =
             SupportedFilesHandler.GetCompleteFilter("itov");
 
+        public static string PMP =
+            SupportedFilesHandler.GetCompleteFilter("pmp");
+
         public static string APIScripts =
             SupportedFilesHandler.GetCompleteFilter("py", "fsx");
 
@@ -251,7 +254,8 @@ namespace BrawlLib.SSBB
             [typeof(STPMNode)] = "stpm",
             [typeof(STDTNode)] = "stdt",
             [typeof(SCLANode)] = "scla",
-            [typeof(HavokNode)] = "hkx"
+            [typeof(HavokNode)] = "hkx",
+            [typeof(PMPNode)] = "pmp"
         };
 
         public static string GetDefaultExportAllExtension(Type type)

@@ -1,4 +1,4 @@
-﻿namespace BrawlLib.SSBB.ResourceNodes
+namespace BrawlLib.SSBB.ResourceNodes
 {
     //Lower byte is resource type (used for icon index)
     //Upper byte is entry type/flags
@@ -45,9 +45,11 @@
         RELExternalMethod,
         RELInheritance,
 
-        //Misc
+        // Misc
         CollisionDef,
         CollisionObj,
+        PMP,
+        PMPObjectEntry,
         MSBin,
         STPM,
         STDT,

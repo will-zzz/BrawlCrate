@@ -36,6 +36,7 @@ pub trait SimpleInput: Eq + Hash + Clone + Debug {
     fn distance_to(&self, other: &Self::Output) -> Self::Distance;
     fn normalized_distance(&self, other: &Self::Output) -> Self::Distance;
     fn as_output(&self) -> Self::Output;
+    #[allow(dead_code)]
     fn nearest(&self, centers: &[Self::Output]) -> u32 {
         let centers_with_indexes = centers.iter().zip(0..);
         let (_center, cluster) = centers_with_indexes

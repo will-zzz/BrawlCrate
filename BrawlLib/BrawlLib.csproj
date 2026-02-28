@@ -27,6 +27,7 @@ BrawlLib Copyright © 2009 - 2019 Bryan Moulton, BlackJax96, libertyernie, Sammi
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <Configurations>Debug;Release;Mono;Canary</Configurations>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DefineConstants>DEBUG</DefineConstants>

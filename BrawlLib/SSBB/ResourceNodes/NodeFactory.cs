@@ -27,6 +27,7 @@ namespace BrawlLib.SSBB.ResourceNodes
             {"REL", typeof(RELNode)},
             {"MASQ", typeof(MasqueradeNode)},
             {"MSBIN", typeof(MSBinNode)},
+            {"PMP", typeof(PMPNode)},
             {"CMM", typeof(CMMNode)},
             {"SELB", typeof(SELBNode)},
             {"SELC", typeof(SELCNode)}
