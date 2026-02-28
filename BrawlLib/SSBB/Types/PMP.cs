@@ -35,7 +35,7 @@ namespace BrawlLib.SSBB.Types
 
     /// <summary>
     /// One object entry in a PMP file (~0x58 bytes).
-    /// Object ID identifies Cup, Tee, etc.
+    /// Object ID identifies Tee (0), Cup (1), etc.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct PMPObjectEntry

@@ -8,7 +8,7 @@ using System.IO;
 namespace BrawlLib.SSBB.ResourceNodes
 {
     /// <summary>
-    /// Wii Sports Golf Pack MaP (PMP) file. Contains object placements (Cup, Tee, etc.) for a hole.
+    /// Wii Sports Golf Pack MaP (PMP) file. Contains object placements (Tee, Cup, etc.) for a hole.
     /// </summary>
     public unsafe class PMPNode : ARCEntryNode
     {
@@ -92,7 +92,7 @@ namespace BrawlLib.SSBB.ResourceNodes
     }
 
     /// <summary>
-    /// One object in a PMP (e.g. Cup or Tee). Position at 0x08 is used for hole/tee location.
+    /// One object in a PMP (e.g. Tee or Cup). Position at 0x08 is used for start (tee) or hole (cup) location.
     /// </summary>
     public unsafe class PMPObjectEntryNode : ResourceNode
     {
@@ -112,7 +112,7 @@ namespace BrawlLib.SSBB.ResourceNodes
         }
 
         [Category("PMP Object")]
-        [Description("Object type: identifies Cup, Tee, etc. in Wii Sports Golf.")]
+        [Description("Object type: identifies Tee (ID 0), Cup (ID 1), etc. in Wii Sports Golf.")]
         public ushort ObjectId
         {
             get => _objectId;
@@ -121,7 +121,7 @@ namespace BrawlLib.SSBB.ResourceNodes
 
         [Category("PMP Object")]
         [TypeConverter(typeof(Vector3StringConverter))]
-        [Description("Position in world space. Change this to move the hole (Cup) or tee.")]
+        [Description("Position in world space. Change this to move the tee (start) or hole (Cup).")]
         public Vector3 Position
         {
             get => _position;
@@ -155,8 +155,8 @@ namespace BrawlLib.SSBB.ResourceNodes
         private string GetDisplayName()
         {
             string kind = "Object";
-            if (ObjectId == 0) kind = "Cup";
-            else if (ObjectId == 1) kind = "Tee";
+            if (ObjectId == 0) kind = "Tee";
+            else if (ObjectId == 1) kind = "Cup";
             return $"{kind} [{Index}] (Group {_objectGroupId}, ID {_objectId})";
         }
 
